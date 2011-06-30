@@ -1,3 +1,5 @@
+package com.android.systemui.statusbar;
+
 /*
  * Copyright (C) 2006 The Android Open Source Project
  *
@@ -14,34 +16,26 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar;
-
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
-import android.graphics.Canvas;
-import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
-import android.text.format.DateFormat;
-import android.text.style.CharacterStyle;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.RelativeSizeSpan;
-import android.text.style.RelativeSizeSpan;
-import android.text.style.StyleSpan;
-import android.util.AttributeSet;
-import android.view.View;
-import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-import com.android.internal.R;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.res.ColorStateList;
+import android.provider.Settings;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.format.DateFormat;
+import android.text.style.CharacterStyle;
+import android.text.style.RelativeSizeSpan;
+import android.util.AttributeSet;
+import android.view.View;
+import android.widget.TextView;
+
 
 /**
  * This widget display an analogic clock with two hands for hours and
@@ -56,8 +50,9 @@ public class Clock extends TextView {
     private static final int AM_PM_STYLE_NORMAL  = 0;
     private static final int AM_PM_STYLE_SMALL   = 1;
     private static final int AM_PM_STYLE_GONE    = 2;
+    private static final int CLOCK_GONE    = 3;
 
-    private static final int AM_PM_STYLE = AM_PM_STYLE_GONE;
+    private static int AM_PM_STYLE = AM_PM_STYLE_GONE;
 
     public Clock(Context context) {
         this(context, null);
@@ -117,37 +112,57 @@ public class Clock extends TextView {
                     mClockFormat.setTimeZone(mCalendar.getTimeZone());
                 }
             }
+            mClockFormatString = "";
             updateClock();
+            
         }
     };
 
     final void updateClock() {
+    	AM_PM_STYLE = Settings.System.getInt(getContext().getContentResolver(), "clock_am_pm_style", 0);
         mCalendar.setTimeInMillis(System.currentTimeMillis());
+        updateColor();
         setText(getSmallTime());
+    }
+    
+    private final void updateColor() {
+    	this.setTextColor(Settings.System.getInt(getContext().getContentResolver(), "clock_color", 0xffffffff));
+    	this.refreshDrawableState();
     }
 
     private final CharSequence getSmallTime() {
         Context context = getContext();
+        
+    	
+    	if(AM_PM_STYLE == CLOCK_GONE) {
+    		this.setVisibility(View.GONE);
+    		return "";
+    	} else {
+    		this.setVisibility(View.VISIBLE);
+    	}
+        
         boolean b24 = DateFormat.is24HourFormat(context);
-        int res;
+        String res;
 
         if (b24) {
-            res = R.string.twenty_four_hour_time_format;
+        	res = "HH:mm";
         } else {
-            res = R.string.twelve_hour_time_format;
+            res = "h:mm a";
         }
 
         final char MAGIC1 = '\uEF00';
         final char MAGIC2 = '\uEF01';
 
         SimpleDateFormat sdf;
-        String format = context.getString(res);
+        //String format = context.getString(res);
+        String format = res;
         if (!format.equals(mClockFormatString)) {
             /*
              * Search for an unquoted "a" in the format string, so we can
              * add dummy characters around it to let us find it again after
              * formatting and change its size.
              */
+        	
             if (AM_PM_STYLE != AM_PM_STYLE_NORMAL) {
                 int a = -1;
                 boolean quoted = false;
@@ -205,4 +220,5 @@ public class Clock extends TextView {
 
     }
 }
+
 
