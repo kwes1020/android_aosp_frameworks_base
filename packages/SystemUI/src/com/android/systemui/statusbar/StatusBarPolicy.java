@@ -437,6 +437,16 @@ public class StatusBarPolicy {
 					R.drawable.stat_sys_data_fully_out_h,
 					R.drawable.stat_sys_data_fully_inandout_h } };
 
+	private static final int[][] sDataNetType_4g = {
+			{ R.drawable.stat_sys_data_connected_4g,
+					R.drawable.stat_sys_data_in_4g,
+					R.drawable.stat_sys_data_out_4g,
+					R.drawable.stat_sys_data_inandout_h },
+			{ R.drawable.stat_sys_data_fully_connected_4g,
+					R.drawable.stat_sys_data_fully_in_4g,
+					R.drawable.stat_sys_data_fully_out_4g,
+					R.drawable.stat_sys_data_fully_inandout_4g } };
+
 	// CDMA
 	// Use 3G icons for EVDO data and 1x icons for 1XRTT data
 	private static final int[][] sDataNetType_1x = {
@@ -1171,7 +1181,12 @@ public class StatusBarPolicy {
 		case TelephonyManager.NETWORK_TYPE_HSUPA:
 		case TelephonyManager.NETWORK_TYPE_HSPA:
 			if (mHspaDataDistinguishable) {
-				mDataIconList = sDataNetType_h[mInetCondition];
+				if (Settings.System.getInt(mContext.getContentResolver(),
+						"tweaks_show_4g_icon", 0) == 1) {
+					mDataIconList = sDataNetType_4g[mInetCondition];
+				} else {
+					mDataIconList = sDataNetType_h[mInetCondition];
+				}
 			} else {
 				mDataIconList = sDataNetType_3g[mInetCondition];
 			}
