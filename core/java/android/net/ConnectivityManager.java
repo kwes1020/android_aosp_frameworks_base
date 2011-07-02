@@ -63,6 +63,13 @@ public class ConnectivityManager
      * is set to {@code true} if there are no connected networks at all.
      */
     public static final String CONNECTIVITY_ACTION = "android.net.conn.CONNECTIVITY_CHANGE";
+    
+    
+    public static final String DATA_ICON_ACTION =
+        "com.roman.edt.DATA_ICON_CHANGE_ACTION";
+    
+    public static final String SIGNAL_ICON_ACTION =
+        "com.roman.edt.SIGNAL_CHANGE_ACTION";
     /**
      * The lookup key for a {@link NetworkInfo} object. Retrieve with
      * {@link android.content.Intent#getParcelableExtra(String)}.

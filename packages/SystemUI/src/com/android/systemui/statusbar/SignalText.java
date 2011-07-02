@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.SignalStrength;
@@ -57,9 +58,7 @@ public class SignalText extends TextView {
 			mAttached = true;
 			IntentFilter filter = new IntentFilter();
 
-			filter.addAction(Intent.ACTION_TIME_CHANGED);
-			filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
-			filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
+			filter.addAction(ConnectivityManager.SIGNAL_ICON_ACTION);
 
 			getContext().registerReceiver(mIntentReceiver, filter, null,
 					getHandler());
@@ -83,40 +82,54 @@ public class SignalText extends TextView {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 
-			style = Settings.System.getInt(getContext().getContentResolver(),
-					"signal_text_style", STYLE_DISABLE);
+			if (intent.getAction().equals(
+					ConnectivityManager.SIGNAL_ICON_ACTION)) {
+				style = Settings.System.getInt(getContext()
+						.getContentResolver(), "tweaks_signal_text_style",
+						STYLE_DISABLE);
 
-			updateSignalColor();
-			updateSignalText();
+				updateSignalColor();
+				updateSignalText();
+			}
 		}
 	};
 
 	final void updateSignalColor() {
 
-		boolean autoColor = Settings.System.getInt(getContext()
-				.getContentResolver(), "signal_text_color_enable", 1) == 1 ? true
+		boolean autoColor = Settings.System
+				.getInt(getContext().getContentResolver(),
+						"tweaks_signal_text_autocolor_enable", 1) == 1 ? true
 				: false;
 
 		int color_regular = Settings.System.getInt(getContext()
-				.getContentResolver(), "signal_text_color_reg", 0xFFFFFFFF);
+				.getContentResolver(), "tweaks_signal_text_color", 0xFFFFFFFF);
 
 		int color_0 = Settings.System.getInt(getContext().getContentResolver(),
-				"signal_text_color_0", 0xFF93D500);
+				"tweaks_signal_text_color_0", 0xFF93D500);
 
 		int color_1 = Settings.System.getInt(getContext().getContentResolver(),
-				"signal_text_color_1", 0xFFFFFFFF);
+				"tweaks_signal_text_color_1", 0xFFFFFFFF);
 
 		int color_2 = Settings.System.getInt(getContext().getContentResolver(),
-				"signal_text_color_2", 0xFFD5A300);
+				"tweaks_signal_text_color_2", 0xFFD5A300);
 
 		int color_3 = Settings.System.getInt(getContext().getContentResolver(),
-				"signal_text_color_3", 0xFFD54B00);
+				"tweaks_signal_text_color_3", 0xFFD54B00);
 
 		int color_4 = Settings.System.getInt(getContext().getContentResolver(),
-				"signal_text_color_4", 0xFFFFFFFF);
+				"tweaks_signal_text_color_4", 0xFFFFFFFF);
 
 		if (autoColor) {
-
+			if (ASU <= 2 || ASU == 99)
+				setTextColor(color_0);
+			else if (ASU >= 12)
+				setTextColor(color_4);
+			else if (ASU >= 8)
+				setTextColor(color_3);
+			else if (ASU >= 5)
+				setTextColor(color_2);
+			else
+				setTextColor(color_1);
 		} else {
 			setTextColor(color_regular);
 		}
@@ -131,15 +144,13 @@ public class SignalText extends TextView {
 		if (style == STYLE_SHOW) {
 			this.setVisibility(View.VISIBLE);
 
-			String result = prependText + Integer.toString(dBm)
-					+ appendText;
+			String result = prependText + Integer.toString(dBm) + appendText;
 
 			setText(result);
 		} else if (style == STYLE_SMALL_DBM) {
 			this.setVisibility(View.VISIBLE);
 
-			String result = prependText + Integer.toString(dBm)
-					+ "dBm ";
+			String result = prependText + Integer.toString(dBm) + "dBm ";
 
 			SpannableStringBuilder formatted = new SpannableStringBuilder(
 					result);

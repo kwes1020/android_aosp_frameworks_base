@@ -568,6 +568,10 @@ public class StatusBarPolicy {
 					|| action
 							.equals(WimaxManagerConstants.WIMAX_STATE_CHANGED_ACTION)) {
 				updateWiMAX(intent);
+			} else if (action.equals(ConnectivityManager.DATA_ICON_ACTION)) {
+				updateDataIcon();
+				updateDataNetType(current_network_type);
+				updateSignalStrength();
 			}
 		}
 	};
@@ -691,6 +695,7 @@ public class StatusBarPolicy {
 		filter.addAction(TtyIntent.TTY_ENABLED_CHANGE_ACTION);
 		filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
 		filter.addAction(ConnectivityManager.INET_CONDITION_ACTION);
+		filter.addAction(ConnectivityManager.DATA_ICON_ACTION);
 		filter.addAction(WimaxManagerConstants.WIMAX_STATE_CHANGED_ACTION);
 		filter.addAction(WimaxManagerConstants.SIGNAL_LEVEL_CHANGED_ACTION);
 		filter.addAction(WimaxManagerConstants.WIMAX_ENABLED_STATUS_CHANGED);
@@ -1045,6 +1050,12 @@ public class StatusBarPolicy {
 	}
 
 	private final void updateSignalStrength() {
+		if(Settings.System.getInt(mContext.getContentResolver(), "tweaks_show_signal_bars", 1) == 0) {
+			mService.setIconVisibility("mPhoneSignalIconId", false);
+		} else {
+			mService.setIconVisibility("mPhoneSignalIconId", true);
+		}
+		
 		int iconLevel = -1;
 		int[] iconList;
 
@@ -1169,7 +1180,10 @@ public class StatusBarPolicy {
 		return (levelEvdoDbm < levelEvdoSnr) ? levelEvdoDbm : levelEvdoSnr;
 	}
 
+	public int current_network_type;
+	
 	private final void updateDataNetType(int net) {
+		current_network_type = net;
 		switch (net) {
 		case TelephonyManager.NETWORK_TYPE_EDGE:
 			mDataIconList = sDataNetType_e[mInetCondition];
