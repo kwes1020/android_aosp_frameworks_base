@@ -24,7 +24,7 @@ public class SignalText extends TextView {
 	int ASU = 0;
 
 	private boolean mAttached;
-	private String prependText = "-";
+	private String prependText = "";
 	private String appendText = "";
 
 	private static final int STYLE_SHOW = 1;
@@ -47,6 +47,11 @@ public class SignalText extends TextView {
 	public SignalText(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 
+		((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE))
+				.listen(mPhoneStateListener,
+						PhoneStateListener.LISTEN_SERVICE_STATE
+								| PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
+
 		// updateSettings();
 	}
 
@@ -63,7 +68,7 @@ public class SignalText extends TextView {
 			getContext().registerReceiver(mIntentReceiver, filter, null,
 					getHandler());
 		}
-		prependText = "-";
+		prependText = "";
 	}
 
 	@Override
@@ -150,7 +155,7 @@ public class SignalText extends TextView {
 		} else if (style == STYLE_SMALL_DBM) {
 			this.setVisibility(View.VISIBLE);
 
-			String result = prependText + Integer.toString(dBm) + "dBm ";
+			String result = prependText + Integer.toString(dBm) + " dBm ";
 
 			SpannableStringBuilder formatted = new SpannableStringBuilder(
 					result);
@@ -167,20 +172,17 @@ public class SignalText extends TextView {
 	}
 
 	/* Start the PhoneState listener */
-	private class MyPhoneStateListener extends PhoneStateListener {
-		/*
-		 * Get the Signal strength from the provider, each tiome there is an
-		 * update
-		 */
+	private PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
 		@Override
 		public void onSignalStrengthsChanged(SignalStrength signalStrength) {
-			super.onSignalStrengthsChanged(signalStrength);
 			signal = signalStrength;
 
 			if (signal != null) {
 				ASU = signal.getGsmSignalStrength();
 			}
 			dBm = -113 + (2 * ASU);
+			updateSignalColor();
+			updateSignalText();
 		}
 
 	};/* End of private Class */

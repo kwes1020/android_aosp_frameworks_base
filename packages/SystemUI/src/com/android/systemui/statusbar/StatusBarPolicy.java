@@ -572,6 +572,8 @@ public class StatusBarPolicy {
 				updateDataIcon();
 				updateDataNetType(current_network_type);
 				updateSignalStrength();
+			} else if(Intent.equals(Intent.ACTION_BATTERY_UPDATE) {
+				updateBatteryVisibility();
 			}
 		}
 	};
@@ -724,14 +726,20 @@ public class StatusBarPolicy {
 		// to "never"
 		// mService.setIconVisibility("sync_failing", isFailing && !isActive);
 	}
-
-	private final void updateBattery(Intent intent) {
+	
+	private final void updateBatteryVisibility() {
 		if (Settings.System.getInt(mContext.getContentResolver(),
 				"show_battery_icon", 1) == 0) {
 			mService.setIconVisibility("battery", false);
 			return;
+		} else {
+			mService.setIconVisibility("battery", true);
 		}
+	}
 
+	private final void updateBattery(Intent intent) {
+		updateBatteryVisibility();
+		
 		final int id = intent.getIntExtra("icon-small", 0);
 		int level = intent.getIntExtra("level", 0);
 		mService.setIcon("battery", id, level);
@@ -1051,9 +1059,10 @@ public class StatusBarPolicy {
 
 	private final void updateSignalStrength() {
 		if(Settings.System.getInt(mContext.getContentResolver(), "tweaks_show_signal_bars", 1) == 0) {
-			mService.setIconVisibility("mPhoneSignalIconId", false);
+			mService.setIconVisibility("phone_signal", false);
+			return;
 		} else {
-			mService.setIconVisibility("mPhoneSignalIconId", true);
+			mService.setIconVisibility("phone_signal", true);
 		}
 		
 		int iconLevel = -1;
