@@ -572,7 +572,7 @@ public class StatusBarPolicy {
 				updateDataIcon();
 				updateDataNetType(current_network_type);
 				updateSignalStrength();
-			} else if(Intent.equals(Intent.ACTION_BATTERY_UPDATE) {
+			} else if(action.equals(Intent.ACTION_BATTERY_UPDATE)) {
 				updateBatteryVisibility();
 			}
 		}
@@ -681,6 +681,7 @@ public class StatusBarPolicy {
 		filter.addAction(Intent.ACTION_POWER_CONNECTED);
 		filter.addAction(Intent.ACTION_ALARM_CHANGED);
 		filter.addAction(Intent.ACTION_SYNC_STATE_CHANGED);
+		filter.addAction(Intent.ACTION_BATTERY_UPDATE);
 		filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
 		filter.addAction(AudioManager.VIBRATE_SETTING_CHANGED_ACTION);
 		filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
@@ -731,7 +732,6 @@ public class StatusBarPolicy {
 		if (Settings.System.getInt(mContext.getContentResolver(),
 				"show_battery_icon", 1) == 0) {
 			mService.setIconVisibility("battery", false);
-			return;
 		} else {
 			mService.setIconVisibility("battery", true);
 		}
